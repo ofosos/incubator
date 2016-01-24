@@ -36,6 +36,7 @@
 #include <Time.h>
 #include <Wire.h>
 #include <EEPROM.h>
+#include <SD.h>
 
 // DS18B20 temperature sensor
 #define ONE_WIRE_PIN 5					// the pin where the temperature sensor is connected
@@ -316,6 +317,16 @@ void setup() // is executed once at the start
 	lcd.setBacklight( 128 );				// set the contrast to 50%
 	splash();
 
+	pinMode(11, OUTPUT);
+	lcd.setCursor(0,0);
+	if (SD.begin(10)) {
+		lcd.print("SD card ready");
+	} else {
+		lcd.print("SD card error");
+	}
+	delay(1500);
+	lcd.clear();
+
 	read_config();
 
 	sensors.begin();						// init Dallas Temperature library
@@ -338,6 +349,8 @@ int iLastTemp= 0;
 tmElements_t oldTm= {99,99,99,99,99,99,99};
 
 int iLastAmbientTemp = 0;
+
+time_t iLastLog = 0;
 
 void loop() // is executed in a loop
 {
@@ -363,6 +376,22 @@ void loop() // is executed in a loop
           lcd.setCursor( 0, 1 );
           print_temp( iTempAmbient );
         }
+
+	if (iLastLog + 300 < RTC.get()) {
+		iLastLog = RTC.get();
+		File logFile = SD.open("incubate.log", FILE_WRITE);
+		logFile.print(RTC.get(), DEC);
+		logFile.print(";");
+		logFile.print(iTemp / 100, DEC);
+		logFile.print(".");
+		logFile.print(iTemp % 100, DEC);
+		logFile.print(";");
+		logFile.print(iTempAmbient / 100, DEC);
+		logFile.print(".");
+		logFile.print(iTempAmbient % 100, DEC);
+		logFile.print(";");
+		logFile.print(cfg.iMode, HEX);
+	}
 
 	if( RTC.read( tm ) ) {
 		tNow= makeTime( tm );
