@@ -38,17 +38,17 @@
 #include <EEPROM.h>
 
 // DS18B20 temperature sensor
-#define ONE_WIRE_PIN 4					// the pin where the temperature sensor is connected
+#define ONE_WIRE_PIN 5					// the pin where the temperature sensor is connected
 OneWire ourWire( ONE_WIRE_PIN );		// init oneWire instance
 DallasTemperature sensors(&ourWire);	// init Dallas Temperature Library
 
-#define ONE_WIRE_PIN2 5
+#define ONE_WIRE_PIN2 6
 OneWire our2ndWire( ONE_WIRE_PIN2 );
 DallasTemperature sensors2(&our2ndWire);
 
 #define OUT1		2					// switch on the heat function on digital output 2
 #define OUT2		3					// switch on the cool function on digital output 3
-#define FAN_CONTROL	13					// switch on the fans on digital output 13
+#define FAN_CONTROL	4					// switch on the fans on digital output 4
 
 #define MODE_OFF	0
 #define MODE_FAN	1
@@ -319,6 +319,7 @@ void setup() // is executed once at the start
 	read_config();
 
 	sensors.begin();						// init Dallas Temperature library
+        sensors2.begin();
 
 	if( RTC.chipPresent() ) {
 		if( !RTC.read( tm ) ) {
