@@ -412,24 +412,26 @@ void loop() // is executed in a loop
           print_temp( iTempAmbient );
         }
 
-	if (iLastLog + 300 < RTC.get()) {
-		iLastLog = RTC.get();
-		File logFile = SD.open("incubate.log", FILE_WRITE);
-		logFile.print(RTC.get(), DEC);
-		logFile.print(";");
-		logFile.print(iTemp / 100, DEC);
-		logFile.print(".");
-		logFile.print(iTemp % 100, DEC);
-		logFile.print(";");
-		logFile.print(iTempAmbient / 100, DEC);
-		logFile.print(".");
-		logFile.print(iTempAmbient % 100, DEC);
-		logFile.print(";");
-		logFile.print(cfg.iMode, HEX);
-	}
-
 	if( RTC.read( tm ) ) {
 		tNow= makeTime( tm );
+
+		if (iLastLog + 60 < tNow) {
+			iLastLog = tNow;
+			File logFile = SD.open("incubate.log", FILE_WRITE);
+			logFile.print(tNow, DEC);
+			logFile.print(";");
+			logFile.print(iTemp / 100, DEC);
+			logFile.print(".");
+			logFile.print(iTemp % 100, DEC);
+			logFile.print(";");
+			logFile.print(iTempAmbient / 100, DEC);
+			logFile.print(".");
+			logFile.print(iTempAmbient % 100, DEC);
+			logFile.print(";");
+			logFile.print(cfg.iMode, HEX);
+			logFile.print("\n");
+			logFile.close();
+		}
 
 		if( fan_on && !need_fan ) {				// check why that fan is still running
 			if( tNow-tFan>=FAN_TIME && cfg.iMode!=MODE_FAN ) {
