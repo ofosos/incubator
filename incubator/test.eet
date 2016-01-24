@@ -1,0 +1,15 @@
+; testing presets useful for development
+
+version=1;
+
+temp { 	name=Tempeh; 
+	finoff;
+	steps 	( temp=34; duration=43200; )
+		( temp=30; duration=129600; ) }
+
+test { 
+	name=Tester; 
+	finstay;
+	steps 	( temp=34; duration=1800; )
+		( temp=30; duration=1800; )
+		( temp=34; duration=1800; ) }
