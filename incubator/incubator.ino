@@ -38,9 +38,13 @@
 #include <EEPROM.h>
 
 // DS18B20 temperature sensor
-#define ONE_WIRE_PIN 11					// the pin where the temperature sensor is connected
+#define ONE_WIRE_PIN 4					// the pin where the temperature sensor is connected
 OneWire ourWire( ONE_WIRE_PIN );		// init oneWire instance
 DallasTemperature sensors(&ourWire);	// init Dallas Temperature Library
+
+#define ONE_WIRE_PIN2 5
+OneWire our2ndWire( ONE_WIRE_PIN2 );
+DallasTemperature sensors2(&our2ndWire);
 
 #define OUT1		2					// switch on the heat function on digital output 2
 #define OUT2		3					// switch on the cool function on digital output 3
@@ -265,29 +269,29 @@ void set_mode()
 
 void print_mode( int8_t i )
 {
-	lcd.setCursor( 3, 1 );
+	lcd.setCursor( 7, 1 );
 	switch( i )
 	{
 	case MODE_OFF:
-		lcd.print( "          OFF" );
+		lcd.print( "      OFF" );
 		break;
 	case MODE_FAN:
-		lcd.print( "       FAN ON" );
+		lcd.print( "   FAN ON" );
 		break;
 	case MODE_HEAT:
-		lcd.print( "      HEAT ON" );
+		lcd.print( "  HEAT ON" );
 		break;
 	case MODE_COOL:
-		lcd.print( "      COOL ON" );
+		lcd.print( "  COOL ON" );
 		break;
 	case MODE_TEMP_H:
-		lcd.print( "HEAT TO" );
+		lcd.print( "HTO" );
 		goto more_temp;							// every C program should have a goto statement, just because you can!
 	case MODE_TEMP_C:
-		lcd.print( "COOL TO" );
+		lcd.print( "CTO" );
 		goto more_temp;
 	case MODE_TEMP_T:
-		lcd.print( " TARGET" );
+		lcd.print( "TGT" );
 	more_temp:
 		print_temp( cfg.iTargetTemp );
 		break;
@@ -332,12 +336,14 @@ void setup() // is executed once at the start
 int iLastTemp= 0;
 tmElements_t oldTm= {99,99,99,99,99,99,99};
 
+int iLastAmbientTemp = 0;
+
 void loop() // is executed in a loop
 {
 	tmElements_t tm;
 	int8_t iNewKey;
-	int iTemp;
-	float fTemp;
+	int iTemp, iTempAmbient;
+	float fTemp, fTempAmbient;
 
 	sensors.requestTemperatures();				// request temperature
 	fTemp= sensors.getTempCByIndex( 0 );		// get temperature
@@ -347,6 +353,15 @@ void loop() // is executed in a loop
 		lcd.setCursor( 10, 0 );
 		print_temp( iTemp );					// display temperature
 	}
+
+        sensors2.requestTemperatures();
+        fTempAmbient = sensors2.getTempCByIndex( 0 );
+        iTempAmbient = (int) (fTempAmbient * 100);
+        if( iTempAmbient != iLastAmbientTemp ) {
+          iLastAmbientTemp = iTempAmbient;
+          lcd.setCursor( 0, 1 );
+          print_temp( iTempAmbient );
+        }
 
 	if( RTC.read( tm ) ) {
 		tNow= makeTime( tm );
