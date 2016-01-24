@@ -353,6 +353,7 @@ void setup() // is executed once at the start
 		}
 
 		lcd.print(bw);
+		pc.close();
 	} else {
 		lcd.setCursor(0, 1);
 		lcd.print("No updates");
