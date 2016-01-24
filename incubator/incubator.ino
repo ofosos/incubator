@@ -324,7 +324,41 @@ void setup() // is executed once at the start
 	} else {
 		lcd.print("SD card error");
 	}
-	delay(1500);
+
+
+	File pc = SD.open("incubate.eep");
+	if (pc) {
+		lcd.setCursor(0, 1);
+		lcd.print("Loading...");
+
+		int bw = 0;
+
+		if (pc.size() > 2){
+			int vers = (pc.read() << 8) | pc.read();
+			int pos = sizeof(cfg);
+			int evers = 0;
+
+			evers |= EEPROM.read(pos) << 8;
+			evers |= EEPROM.read(pos + 1);
+
+			if (evers < vers) {
+
+				EEPROM.write(pos++, vers >> 8);
+				EEPROM.write(pos++, vers & 0xff);
+				while (pc.available()){
+					EEPROM.write(pos++, pc.read());
+					bw++;
+				}
+			}
+		}
+
+		lcd.print(bw);
+	} else {
+		lcd.setCursor(0, 1);
+		lcd.print("No updates");
+	}
+
+	delay(2500);
 	lcd.clear();
 
 	read_config();
